@@ -45,7 +45,7 @@
                                             {{ item.product.name }}
                                         </a>
                                         {% if not item.is_available %}
-                                            <div style="color: #dc2626; font-size: 0.8rem; font-weight: 600;">
+                                            <div class="badge badge-rejected" style="margin-top: 0.25rem;">
                                                 ⚠️ Only {{ item.product.quantity }} in stock!
                                             </div>
                                         {% endif %}

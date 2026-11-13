@@ -38,19 +38,19 @@
 
     <!-- Shift Filter Pills -->
     <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
-        <a href="{% url 'vet_list' %}" class="btn {% if not shift_filter %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter %}color:var(--text); border-color:var(--border);{% endif %}">
+        <a href="{% url 'vet_list' %}" class="btn {% if not shift_filter %}btn-primary{% else %}btn-outline{% endif %}">
             All Vets ({{ morning_vets.count|add:mid_vets.count|add:night_vets.count }})
         </a>
-        <a href="{% url 'vet_list' %}?shift=active" class="btn {% if shift_filter == 'active' %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter != 'active' %}color:var(--text); border-color:var(--border);{% endif %}">
+        <a href="{% url 'vet_list' %}?shift=active" class="btn {% if shift_filter == 'active' %}btn-primary{% else %}btn-outline{% endif %}">
             ⚡ On Duty Now ({{ active_vets.count }})
         </a>
-        <a href="{% url 'vet_list' %}?shift=morning" class="btn {% if shift_filter == 'morning' %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter != 'morning' %}color:var(--text); border-color:var(--border);{% endif %}">
+        <a href="{% url 'vet_list' %}?shift=morning" class="btn {% if shift_filter == 'morning' %}btn-primary{% else %}btn-outline{% endif %}">
             🌅 Morning: 6AM &ndash; 2PM ({{ morning_vets.count }})
         </a>
-        <a href="{% url 'vet_list' %}?shift=mid" class="btn {% if shift_filter == 'mid' %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter != 'mid' %}color:var(--text); border-color:var(--border);{% endif %}">
+        <a href="{% url 'vet_list' %}?shift=mid" class="btn {% if shift_filter == 'mid' %}btn-primary{% else %}btn-outline{% endif %}">
             ☀️ Mid: 2PM &ndash; 10PM ({{ mid_vets.count }})
         </a>
-        <a href="{% url 'vet_list' %}?shift=night" class="btn {% if shift_filter == 'night' %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter != 'night' %}color:var(--text); border-color:var(--border);{% endif %}">
+        <a href="{% url 'vet_list' %}?shift=night" class="btn {% if shift_filter == 'night' %}btn-primary{% else %}btn-outline{% endif %}">
             🌙 Night: 10PM &ndash; 6AM ({{ night_vets.count }})
         </a>
     </div>

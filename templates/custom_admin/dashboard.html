@@ -45,11 +45,11 @@
             <span>🛍️</span>
         </div>
         <div class="admin-stat-value">{{ total_products }}</div>
-        <div style="font-size:0.8rem; color:var(--text-muted);">
+        <div style="font-size:0.8rem; margin-top:0.25rem;">
             {% if out_of_stock_products > 0 %}
-                <span style="color:#dc2626; font-weight:600;">{{ out_of_stock_products }} out of stock</span>
+                <span class="badge badge-rejected">{{ out_of_stock_products }} out of stock</span>
             {% else %}
-                <span style="color:#16a34a;">All items in stock</span>
+                <span class="badge badge-available">All items in stock</span>
             {% endif %}
         </div>
     </div>

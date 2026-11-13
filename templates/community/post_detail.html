@@ -106,13 +106,13 @@
                     <a href="{% url 'post_inquiries' post.pk %}" class="btn btn-primary btn-block">
                         View Adoption Requests ({{ post.request_count }})
                     </a>
-                    <a href="{% url 'edit_post' post.pk %}" class="btn btn-block" style="background: var(--border); color: var(--text); justify-content: center;">
+                    <a href="{% url 'edit_post' post.pk %}" class="btn btn-outline btn-block" style="justify-content: center;">
                         Edit Post
                     </a>
                     {% if post.is_open %}
                         <form method="post" action="{% url 'mark_given' post.pk %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-block" style="background: #0ea5e9; color: #fff; width: 100%; justify-content: center;">
+                            <button type="submit" class="btn btn-primary btn-block" style="width: 100%; justify-content: center;">
                                 Mark as Given for Adoption
                             </button>
                         </form>

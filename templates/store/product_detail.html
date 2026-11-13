@@ -57,9 +57,9 @@
                         <td>Inventory Status</td>
                         <td>
                             {% if product.is_in_stock %}
-                                <span style="color: #065f46; font-weight: 600;">Available ({{ product.quantity }} units ready to ship)</span>
+                                <span class="badge badge-available">✓ In Stock ({{ product.quantity }} units ready to ship)</span>
                             {% else %}
-                                <span style="color: #991b1b; font-weight: 600;">Currently Out of Stock</span>
+                                <span class="badge badge-rejected">✗ Currently Out of Stock</span>
                             {% endif %}
                         </td>
                     </tr>

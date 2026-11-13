@@ -54,13 +54,13 @@
                             <a href="{% url 'post_inquiries' post.pk %}" class="btn btn-sm btn-primary">
                                 Requests ({{ post.request_count }})
                             </a>
-                            <a href="{% url 'edit_post' post.pk %}" class="btn btn-sm" style="background: var(--border); color: var(--text); justify-content: center;">
+                            <a href="{% url 'edit_post' post.pk %}" class="btn btn-sm btn-outline" style="justify-content: center;">
                                 Edit
                             </a>
                             {% if post.is_open %}
                             <form method="post" action="{% url 'mark_given' post.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-block" style="background: #0ea5e9; color: #fff; justify-content: center;">
+                                <button type="submit" class="btn btn-sm btn-block btn-primary" style="justify-content: center;">
                                     Mark Given
                                 </button>
                             </form>
