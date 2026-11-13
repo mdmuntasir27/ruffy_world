@@ -16,3 +16,14 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'yeager_adoption.settings')
 application = get_wsgi_application()
 app = application
 
+# If running in Vercel serverless environment, migrate & seed into writable /tmp
+if os.environ.get('VERCEL'):
+    try:
+        from django.core.management import call_command
+        call_command('migrate', interactive=False)
+        call_command('populate_sample_pets')
+        call_command('populate_store')
+        call_command('populate_vets')
+    except Exception as e:
+        print(f"Vercel DB initialization error: {e}")
+
