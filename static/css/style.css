@@ -175,11 +175,38 @@ a:hover {
     align-items: center;
     justify-content: center;
     font-size: 1rem;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
 }
 
 .theme-toggle:hover {
     background: rgba(255,255,255,0.22);
+}
+
+/* Theme toggle inside topbars / light backgrounds (e.g. admin panel) */
+.admin-topbar .theme-toggle {
+    background: rgba(57, 88, 101, 0.08);
+    border: 1px solid var(--border);
+    color: var(--primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.admin-topbar .theme-toggle:hover {
+    background: rgba(57, 88, 101, 0.16);
+    color: var(--primary-dark);
+    border-color: var(--primary);
+}
+
+[data-theme="dark"] .admin-topbar .theme-toggle {
+    background: rgba(140, 183, 178, 0.12);
+    border: 1px solid var(--border);
+    color: var(--primary-light);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .admin-topbar .theme-toggle:hover {
+    background: rgba(140, 183, 178, 0.25);
+    color: #ffffff;
+    border-color: var(--primary-light);
 }
 
 /* Buttons */
