@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Find Available Veterinarians - Ruffy World{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>🩺 Veterinary Care & Support</h1>
+    <p>Find trusted veterinarians available 24/7 across Morning, Mid, and Night shifts</p>
+</div>
+
+<div class="container">
+    <!-- Real-time Shift & Clock Status Card -->
+    <div class="card" style="margin-bottom: 2rem; border-left: 5px solid var(--primary-light);">
+        <div class="card-body" style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">
+                    🕒 Current Local System Clock
+                </div>
+                <div style="font-size: 1.6rem; font-weight: 800; color: var(--text); margin-top: 0.2rem;">
+                    {{ current_time_str }}
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                    {{ current_date_str }} &middot; Asia/Dhaka
+                </div>
+            </div>
+
+            <div style="text-align: right;">
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.35rem;">
+                    Active Shift Right Now
+                </div>
+                <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--badge-available); color: var(--badge-available-text); padding: 0.5rem 1.2rem; border-radius: 999px; font-weight: 800; font-size: 0.95rem;">
+                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #22c55e;"></span>
+                    {{ active_shift_title }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shift Filter Pills -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <a href="{% url 'vet_list' %}" class="btn {% if not shift_filter %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter %}color:var(--text); border-color:var(--border);{% endif %}">
+            All Vets ({{ morning_vets.count|add:mid_vets.count|add:night_vets.count }})
+        </a>
+        <a href="{% url 'vet_list' %}?shift=active" class="btn {% if shift_filter == 'active' %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter != 'active' %}color:var(--text); border-color:var(--border);{% endif %}">
+            ⚡ On Duty Now ({{ active_vets.count }})
+        </a>
+        <a href="{% url 'vet_list' %}?shift=morning" class="btn {% if shift_filter == 'morning' %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter != 'morning' %}color:var(--text); border-color:var(--border);{% endif %}">
+            🌅 Morning: 6AM &ndash; 2PM ({{ morning_vets.count }})
+        </a>
+        <a href="{% url 'vet_list' %}?shift=mid" class="btn {% if shift_filter == 'mid' %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter != 'mid' %}color:var(--text); border-color:var(--border);{% endif %}">
+            ☀️ Mid: 2PM &ndash; 10PM ({{ mid_vets.count }})
+        </a>
+        <a href="{% url 'vet_list' %}?shift=night" class="btn {% if shift_filter == 'night' %}btn-primary{% else %}btn-outline{% endif %}" style="{% if shift_filter != 'night' %}color:var(--text); border-color:var(--border);{% endif %}">
+            🌙 Night: 10PM &ndash; 6AM ({{ night_vets.count }})
+        </a>
+    </div>
+
+    <!-- Vets Grid -->
+    {% if vets %}
+        <div class="pet-grid">
+            {% for vet in vets %}
+            <div class="pet-card" style="{% if vet.shift == active_shift %}border: 2px solid var(--primary-light); box-shadow: 0 4px 15px rgba(44, 125, 160, 0.15);{% endif %}">
+                <div style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); padding: 1.5rem; text-align: center; color: #fff; position: relative;">
+                    {% if vet.shift == active_shift %}
+                        <div style="position: absolute; top: 12px; right: 12px; background: #22c55e; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                            ● On Duty Now
+                        </div>
+                    {% endif %}
+
+                    <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; border: 2px solid rgba(255, 255, 255, 0.4);">
+                        🩺
+                    </div>
+                    <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.25rem;">Dr. {{ vet.name }}</h3>
+                    <div style="font-size: 0.85rem; opacity: 0.9;">{{ vet.specialization }}</div>
+                </div>
+
+                <div class="pet-card-body">
+                    <div style="margin-bottom: 0.75rem;">
+                        <span class="badge {% if vet.shift == 'morning' %}badge-pending{% elif vet.shift == 'mid' %}badge-available{% else %}badge-approved{% endif %}" style="font-size: 0.8rem; font-weight: 700;">
+                            {% if vet.shift == 'morning' %}🌅 Morning: 6AM &ndash; 2PM
+                            {% elif vet.shift == 'mid' %}☀️ Mid: 2PM &ndash; 10PM
+                            {% else %}🌙 Night: 10PM &ndash; 6AM{% endif %}
+                        </span>
+                    </div>
+
+                    <table class="info-table" style="font-size: 0.85rem; margin-bottom: 0.75rem;">
+                        <tr>
+                            <td>Hours</td>
+                            <td><strong>{{ vet.shift_time_range }}</strong> (8 hrs)</td>
+                        </tr>
+                        <tr>
+                            <td>Clinic</td>
+                            <td>📍 {{ vet.clinic_address }}</td>
+                        </tr>
+                        <tr>
+                            <td>Phone</td>
+                            <td>
+                                <a href="tel:{{ vet.phone }}" style="color: var(--primary-light); font-weight: 700; text-decoration: none;">
+                                    📞 {{ vet.phone }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% if vet.email %}
+                        <tr>
+                            <td>Email</td>
+                            <td>
+                                <a href="mailto:{{ vet.email }}" style="color: var(--primary-light); text-decoration: none;">
+                                    ✉️ {{ vet.email }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+
+                    {% if vet.bio %}
+                        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: auto;">
+                            {{ vet.bio }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="pet-card-footer">
+                    <a href="tel:{{ vet.phone }}" class="btn btn-primary btn-block" style="justify-content: center;">
+                        📞 Call Dr. {{ vet.name }}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🩺</div>
+            <h3>No veterinarians found for this shift</h3>
+            <p>Please select another shift or view all veterinarians.</p>
+            <a href="{% url 'vet_list' %}" class="btn btn-primary mt-2">View All Vets</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

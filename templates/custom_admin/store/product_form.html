@@ -1,0 +1,71 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:750px; margin:0 auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <div>
+            <h1 style="font-size:1.5rem; font-weight:800; margin:0;">{{ title }}</h1>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.25rem;">Enter product specifications and inventory stock.</p>
+        </div>
+        <a href="{% url 'custom_admin:product_list' %}" class="btn btn-outline btn-sm" style="color:var(--text); border-color:var(--border);">&larr; Back to Products</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" class="form-stack">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="form-label">Product Title *</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Category *</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}<div class="form-error">{{ form.category.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Price (BDT) *</label>
+                        {{ form.price }}
+                        {% if form.price.errors %}<div class="form-error">{{ form.price.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Available Inventory Quantity *</label>
+                    {{ form.quantity }}
+                    <small style="color:var(--text-muted); font-size:0.8rem;">If set to 0, item automatically displays "Out of Stock" on the store.</small>
+                    {% if form.quantity.errors %}<div class="form-error">{{ form.quantity.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description & Features</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}<div class="form-error">{{ form.description.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Product Image</label>
+                    {{ form.image }}
+                    {% if form.image.errors %}<div class="form-error">{{ form.image.errors.0 }}</div>{% endif %}
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-error">
+                        {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+                    </div>
+                {% endif %}
+
+                <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1rem;">
+                    <a href="{% url 'custom_admin:product_list' %}" class="btn btn-outline" style="color:var(--text); border-color:var(--border);">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

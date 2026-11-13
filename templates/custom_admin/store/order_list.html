@@ -1,0 +1,110 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block page_title %}Store Orders Management{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+    <div>
+        <h1 style="font-size:1.5rem; font-weight:800; margin:0;">Customer Orders</h1>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.25rem;">Monitor purchases, manage delivery progress, and update payment statuses.</p>
+    </div>
+</div>
+
+<!-- SEARCH & FILTER BAR -->
+<div class="filter-card">
+    <form method="get" class="filter-row" style="grid-template-columns: 2fr 1fr 1fr auto;">
+        <div class="form-group">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by order #, username, customer name, phone...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Order Status</label>
+            <select name="status" class="form-control">
+                <option value="">All Statuses</option>
+                {% for code, label in order_statuses %}
+                    <option value="{{ code }}" {% if status == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Payment Status</label>
+            <select name="payment" class="form-control">
+                <option value="">All Payments</option>
+                {% for code, label in payment_statuses %}
+                    <option value="{{ code }}" {% if payment_status == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- ORDERS TABLE -->
+<div class="admin-table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Total Amount</th>
+                <th>Payment Method</th>
+                <th>Payment Status</th>
+                <th>Order Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in page_obj %}
+            <tr>
+                <td><strong>#{{ order.pk }}</strong></td>
+                <td>
+                    <strong>{{ order.full_name|default:order.user.username }}</strong>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">@{{ order.user.username }}</div>
+                </td>
+                <td>{{ order.phone }}</td>
+                <td><strong>৳{{ order.total_amount }}</strong></td>
+                <td>{{ order.get_payment_method_display }}</td>
+                <td>
+                    <span class="badge {% if order.payment_status == 'paid' %}badge-available{% else %}badge-pending{% endif %}">
+                        {{ order.get_payment_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge badge-available">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ order.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <div class="admin-actions">
+                        <a href="{% url 'custom_admin:order_detail' order.pk %}" class="btn-action-sm btn-action-view">Manage</a>
+                        <a href="{% url 'order_receipt' order.pk %}" target="_blank" class="btn-action-sm btn-action-edit" title="Receipt">🧾</a>
+                        <a href="{% url 'custom_admin:order_delete' order.pk %}" class="btn-action-sm btn-action-delete">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center text-muted" style="padding:3rem;">No customer orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- PAGINATION -->
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&status={{ status }}&payment={{ payment_status }}">&larr; Previous</a>
+    {% endif %}
+    <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&status={{ status }}&payment={{ payment_status }}">Next &rarr;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

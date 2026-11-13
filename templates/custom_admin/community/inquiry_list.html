@@ -1,0 +1,73 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block page_title %}Post Inquiries Management{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+    <div>
+        <h1 style="font-size:1.5rem; font-weight:800; margin:0;">Community Inquiries</h1>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.25rem;">Direct inquiries sent between community members regarding pets.</p>
+    </div>
+</div>
+
+<div class="admin-table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Requester</th>
+                <th>Contact Phone</th>
+                <th>Target Post</th>
+                <th>Post Author</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inq in page_obj %}
+            <tr>
+                <td>#{{ inq.pk }}</td>
+                <td>
+                    <strong>{{ inq.requester.username }}</strong>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">{{ inq.requester.email }}</div>
+                </td>
+                <td>{{ inq.contact_phone }}</td>
+                <td>
+                    <strong>{{ inq.post.pet_name }}</strong>
+                </td>
+                <td>{{ inq.post.author.username }}</td>
+                <td>
+                    <span class="badge {% if inq.status == 'Approved' %}badge-available{% elif inq.status == 'Rejected' %}badge-rejected{% else %}badge-pending{% endif %}">
+                        {{ inq.status }}
+                    </span>
+                </td>
+                <td>{{ inq.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <div class="admin-actions">
+                        <a href="{% url 'custom_admin:community_inquiry_detail' inq.pk %}" class="btn-action-sm btn-action-view">Review</a>
+                        <a href="{% url 'custom_admin:community_inquiry_delete' inq.pk %}" class="btn-action-sm btn-action-delete">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center text-muted" style="padding:3rem;">No community inquiries found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- PAGINATION -->
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">&larr; Previous</a>
+    {% endif %}
+    <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Next &rarr;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

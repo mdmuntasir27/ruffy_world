@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Ruffy World Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header mt-2">
+        <h1>📦 Checkout & Delivery</h1>
+        <p>Complete your shipping and payment information to place your order</p>
+    </div>
+
+    {% if stock_errors %}
+        <div class="alert alert-error">
+            <strong>Stock Alert:</strong>
+            <ul style="margin: 0.5rem 0 0 1.25rem;">
+                {% for err in stock_errors %}
+                    <li>{{ err }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div style="display: grid; grid-template-columns: 1fr 380px; gap: 2rem; align-items: start;">
+        <!-- Left: Form -->
+        <div class="card">
+            <div class="card-header" style="font-size: 1.1rem;">
+                1. Delivery & Contact Details
+            </div>
+            <div class="card-body">
+                <form method="post" id="checkout-form">
+                    {% csrf_token %}
+
+                    <div class="form-stack">
+                        <div class="form-group">
+                            <label class="form-label">Full Name *</label>
+                            {{ form.full_name }}
+                            {% if form.full_name.errors %}<div style="color:#ef4444; font-size:0.8rem;">{{ form.full_name.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Contact Phone Number *</label>
+                            {{ form.phone }}
+                            <small class="text-muted">For delivery driver updates and order confirmation</small>
+                            {% if form.phone.errors %}<div style="color:#ef4444; font-size:0.8rem;">{{ form.phone.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Shipping / Delivery Address *</label>
+                            {{ form.shipping_address }}
+                            {% if form.shipping_address.errors %}<div style="color:#ef4444; font-size:0.8rem;">{{ form.shipping_address.errors }}</div>{% endif %}
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="form-group">
+                            <label class="form-label" style="font-size: 1rem; margin-bottom: 0.75rem;">
+                                2. Select Payment Method *
+                            </label>
+
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <label style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color 0.2s;" id="label-cod">
+                                    <input type="radio" name="payment_method" value="cod" checked style="margin-top: 0.25rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem;">💵 Cash on Delivery (COD)</div>
+                                        <div style="font-size: 0.82rem; color: var(--text-muted);">
+                                            Pay in cash directly to the delivery person when your package arrives.
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color 0.2s;" id="label-online">
+                                    <input type="radio" name="payment_method" value="online" style="margin-top: 0.25rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem;">💳 Online Payment (Instant Dummy)</div>
+                                        <div style="font-size: 0.82rem; color: var(--text-muted);">
+                                            Simulated digital payment (bKash / Nagad / Card). Order is marked as <strong>Paid</strong> immediately!
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1rem;">
+                            <button type="submit" class="btn btn-primary btn-block" style="padding: 0.9rem; font-size: 1.05rem; font-weight: 700;">
+                                Confirm & Place Order (BDT {{ total }}) &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right: Order Summary Sidebar -->
+        <div>
+            <div class="card">
+                <div class="card-header">Order Summary ({{ cart_items|length }} item{{ cart_items|length|pluralize }})</div>
+                <div class="card-body" style="padding: 1.25rem;">
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 350px; overflow-y: auto; margin-bottom: 1rem; padding-right: 0.25rem;">
+                        {% for item in cart_items %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.9rem;">{{ item.product.name }}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                    {{ item.quantity }} &times; BDT {{ item.product.price }}
+                                </div>
+                            </div>
+                            <div style="font-weight: 700; font-size: 0.9rem;">
+                                BDT {{ item.subtotal }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <table class="info-table" style="margin-bottom: 0;">
+                        <tr>
+                            <td>Subtotal</td>
+                            <td style="text-align: right; font-weight: 600;">BDT {{ total }}</td>
+                        </tr>
+                        <tr>
+                            <td>Shipping Delivery</td>
+                            <td style="text-align: right; color: #065f46; font-weight: 600;">FREE</td>
+                        </tr>
+                        <tr style="border-top: 2px solid var(--border);">
+                            <td style="font-size: 1.1rem; font-weight: 800;">Total Amount</td>
+                            <td style="text-align: right; font-size: 1.25rem; font-weight: 800; color: var(--primary-light);">
+                                BDT {{ total }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem; text-align: center;">
+                <a href="{% url 'view_cart' %}" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">
+                    &larr; Back to cart to modify quantities
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

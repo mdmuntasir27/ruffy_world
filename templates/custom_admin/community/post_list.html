@@ -1,0 +1,103 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block page_title %}Community Posts Management{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+    <div>
+        <h1 style="font-size:1.5rem; font-weight:800; margin:0;">Community Adoption Listings</h1>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.25rem;">Monitor member-submitted adoption posts across the community.</p>
+    </div>
+</div>
+
+<!-- SEARCH & FILTER BAR -->
+<div class="filter-card">
+    <form method="get" class="filter-row" style="grid-template-columns: 2fr 1fr auto;">
+        <div class="form-group">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by pet name, author username...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-control">
+                <option value="">All Statuses</option>
+                <option value="Open" {% if status == 'Open' %}selected{% endif %}>Open</option>
+                <option value="Given" {% if status == 'Given' %}selected{% endif %}>Given</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- POSTS TABLE -->
+<div class="admin-table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Pet</th>
+                <th>Author</th>
+                <th>Type</th>
+                <th>Age</th>
+                <th>Location</th>
+                <th>Inquiries</th>
+                <th>Status</th>
+                <th>Posted Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in page_obj %}
+            <tr>
+                <td>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" alt="{{ post.pet_name }}" style="width:38px; height:38px; border-radius:6px; object-fit:cover;">
+                        {% else %}
+                            <div style="width:38px; height:38px; border-radius:6px; background:var(--accent-light); display:flex; align-items:center; justify-content:center;">🐾</div>
+                        {% endif %}
+                        <strong><a href="{% url 'post_detail' post.pk %}" target="_blank" style="color:var(--text); text-decoration:none;">{{ post.pet_name }}</a></strong>
+                    </div>
+                </td>
+                <td>{{ post.author.username }}</td>
+                <td>{{ post.animal_type }}</td>
+                <td>{{ post.age|default:'—' }}</td>
+                <td>{{ post.location }}</td>
+                <td>
+                    <span class="badge badge-available">{{ post.inquiry_count }} inquiries</span>
+                </td>
+                <td>
+                    <span class="badge {% if post.status == 'Open' %}badge-available{% else %}badge-adopted{% endif %}">
+                        {{ post.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ post.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <div class="admin-actions">
+                        <a href="{% url 'post_detail' post.pk %}" target="_blank" class="btn-action-sm btn-action-view">View</a>
+                        <a href="{% url 'custom_admin:community_post_delete' post.pk %}" class="btn-action-sm btn-action-delete">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center text-muted" style="padding:3rem;">No community posts found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- PAGINATION -->
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&status={{ status }}">&larr; Previous</a>
+    {% endif %}
+    <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&status={{ status }}">Next &rarr;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

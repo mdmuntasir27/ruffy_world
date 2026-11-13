@@ -1,0 +1,354 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ruffy World Admin Panel{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        .admin-sidebar {
+            width: 260px;
+            background-color: var(--nav-bg);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .admin-sidebar-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .admin-brand {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.15rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .admin-badge-pill {
+            background: rgba(140, 183, 178, 0.25);
+            color: #8cb7b2;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .admin-menu {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex: 1;
+        }
+        .admin-menu-section {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(255,255,255,0.45);
+            padding: 0.75rem 0.75rem 0.25rem;
+            font-weight: 700;
+        }
+        .admin-menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.85rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .admin-menu-item a:hover {
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+        }
+        .admin-menu-item.active a {
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .admin-sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .admin-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg);
+            overflow-x: hidden;
+        }
+        .admin-topbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .admin-content {
+            padding: 2rem 1.75rem;
+            flex: 1;
+        }
+        .admin-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .admin-stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .admin-stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .admin-stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0.25rem 0;
+        }
+        .admin-table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        .admin-table-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .admin-table-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .admin-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .btn-action-sm {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+        .btn-action-edit {
+            background: rgba(82, 121, 138, 0.15);
+            color: var(--primary);
+            border-color: rgba(82, 121, 138, 0.3);
+        }
+        .btn-action-edit:hover {
+            background: var(--primary);
+            color: #ffffff;
+        }
+        .btn-action-delete {
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+            border-color: rgba(220, 38, 38, 0.2);
+        }
+        .btn-action-delete:hover {
+            background: #dc2626;
+            color: #ffffff;
+        }
+        .btn-action-view {
+            background: rgba(140, 183, 178, 0.2);
+            color: var(--primary-dark);
+            border-color: rgba(140, 183, 178, 0.4);
+        }
+        .btn-action-view:hover {
+            background: var(--accent);
+            color: #ffffff;
+        }
+        @media (max-width: 900px) {
+            .admin-layout {
+                flex-direction: column;
+            }
+            .admin-sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+    <script src="{% static 'js/main.js' %}"></script>
+</head>
+<body>
+
+<div class="admin-layout">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <a href="{% url 'custom_admin:dashboard' %}" class="admin-brand">
+                <span>🐾 Ruffy World</span>
+            </a>
+            <span class="admin-badge-pill">Admin</span>
+        </div>
+
+        <ul class="admin-menu">
+            <li class="admin-menu-item">
+                <a href="{% url 'custom_admin:dashboard' %}">
+                    <span>📊</span> Dashboard
+                </a>
+            </li>
+
+            <li class="admin-menu-section">Pets & Adoptions</li>
+            <li class="admin-menu-item">
+                <a href="{% url 'custom_admin:pet_list' %}">
+                    <span>🐶</span> Manage Pets
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{% url 'custom_admin:adoption_list' %}">
+                    <span>📋</span> Adoption Requests
+                </a>
+            </li>
+
+            <li class="admin-menu-section">Store & Ecommerce</li>
+            <li class="admin-menu-item">
+                <a href="{% url 'custom_admin:product_list' %}">
+                    <span>🛍️</span> Accessories Store
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{% url 'custom_admin:order_list' %}">
+                    <span>📦</span> Customer Orders
+                </a>
+            </li>
+
+            <li class="admin-menu-section">Services & Community</li>
+            <li class="admin-menu-item">
+                <a href="{% url 'custom_admin:vet_list' %}">
+                    <span>🩺</span> Veterinarians
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{% url 'custom_admin:community_post_list' %}">
+                    <span>💬</span> Community Posts
+                </a>
+            </li>
+            <li class="admin-menu-item">
+                <a href="{% url 'custom_admin:community_inquiry_list' %}">
+                    <span>📩</span> Post Inquiries
+                </a>
+            </li>
+
+            <li class="admin-menu-section">Users & Security</li>
+            <li class="admin-menu-item">
+                <a href="{% url 'custom_admin:user_list' %}">
+                    <span>👥</span> User Accounts
+                </a>
+            </li>
+        </ul>
+
+        <div class="admin-sidebar-footer">
+            <a href="{% url 'home' %}" target="_blank" style="color:#8cb7b2; text-decoration:none; display:flex; align-items:center; gap:0.4rem;">
+                <span>🌐</span> Visit Live Site &rarr;
+            </a>
+            <a href="{% url 'custom_admin:logout' %}" style="color:#fca5a5; text-decoration:none; display:flex; align-items:center; gap:0.4rem;">
+                <span>🚪</span> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN BODY -->
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+                <h2 style="font-size:1.15rem; font-weight:700; margin:0;">
+                    {% block page_title %}Dashboard{% endblock %}
+                </h2>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <button class="theme-toggle" id="theme-toggle" title="Toggle theme">☾</button>
+                <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem;">
+                    <div style="width:32px; height:32px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <div style="font-weight:600;">{{ user.username }}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">
+                            {% if user.is_superuser %}Super Administrator{% else %}Staff Admin{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <a href="{% url 'custom_admin:logout' %}" class="btn btn-outline btn-sm" style="color:var(--text); border-color:var(--border);">
+                    Logout
+                </a>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div class="messages-container" style="padding-top:1.5rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✗{% elif message.tags == 'warning' %}⚠{% else %}ℹ{% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <main class="admin-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+</body>
+</html>

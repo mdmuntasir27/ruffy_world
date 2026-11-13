@@ -1,0 +1,46 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block page_title %}Inquiry #{{ inquiry.pk }}{% endblock %}
+
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <div>
+            <h1 style="font-size:1.5rem; font-weight:800; margin:0;">Inquiry #{{ inquiry.pk }}</h1>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.25rem;">
+                Sent on {{ inquiry.created_at|date:"F d, Y at H:i" }}
+            </p>
+        </div>
+        <a href="{% url 'custom_admin:community_inquiry_list' %}" class="btn btn-outline btn-sm" style="color:var(--text); border-color:var(--border);">&larr; Back to Inquiries</a>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-header">Details</div>
+        <div class="card-body">
+            <table class="info-table">
+                <tr><td>Requester:</td><td><strong>{{ inquiry.requester.username }}</strong></td></tr>
+                <tr><td>Contact Phone:</td><td><strong>{{ inquiry.contact_phone }}</strong></td></tr>
+                <tr><td>Contact Address:</td><td>{{ inquiry.contact_address }}</td></tr>
+                <tr><td>Target Post:</td><td><strong><a href="{% url 'post_detail' inquiry.post.pk %}" target="_blank" style="color:var(--primary);">{{ inquiry.post.pet_name }}</a></strong> (Author: {{ inquiry.post.author.username }})</td></tr>
+                <tr><td>Inquiry Message:</td><td><p style="background:var(--bg); padding:0.75rem; border-radius:6px; margin:0;">{{ inquiry.message }}</p></td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Manage Status</div>
+        <div class="card-body">
+            <form method="post" style="display:flex; justify-content:space-between; align-items:flex-end;">
+                {% csrf_token %}
+                <div class="form-group" style="max-width:280px; width:100%;">
+                    <label class="form-label">Inquiry Status</label>
+                    {{ form.status }}
+                </div>
+                <div style="display:flex; gap:0.5rem;">
+                    <a href="{% url 'custom_admin:community_inquiry_delete' inquiry.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

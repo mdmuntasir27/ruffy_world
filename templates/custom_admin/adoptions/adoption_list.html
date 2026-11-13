@@ -1,0 +1,102 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block page_title %}Adoption Requests{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+    <div>
+        <h1 style="font-size:1.5rem; font-weight:800; margin:0;">Adoption Requests</h1>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.25rem;">Review and process adoption applications submitted by users.</p>
+    </div>
+</div>
+
+<!-- SEARCH & FILTER BAR -->
+<div class="filter-card">
+    <form method="get" class="filter-row" style="grid-template-columns: 2fr 1fr auto;">
+        <div class="form-group">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by applicant username, pet name, phone...">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Status Filter</label>
+            <select name="status" class="form-control">
+                <option value="">All Statuses</option>
+                <option value="Pending" {% if status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Approved" {% if status == 'Approved' %}selected{% endif %}>Approved</option>
+                <option value="Rejected" {% if status == 'Rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+    </form>
+</div>
+
+<!-- REQUESTS TABLE -->
+<div class="admin-table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Req #</th>
+                <th>Applicant</th>
+                <th>Contact Phone</th>
+                <th>Pet Target</th>
+                <th>Prior Experience</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in page_obj %}
+            <tr>
+                <td><strong>#{{ req.pk }}</strong></td>
+                <td>
+                    <strong>{{ req.user.username }}</strong>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">{{ req.user.email }}</div>
+                </td>
+                <td>{{ req.phone }}</td>
+                <td>
+                    <strong>{{ req.pet.name }}</strong> ({{ req.pet.animal_type }})
+                </td>
+                <td>
+                    {% if req.previous_pet_experience %}
+                        <span style="color:#16a34a; font-weight:600;">✓ Yes</span>
+                    {% else %}
+                        <span style="color:var(--text-muted);">No</span>
+                    {% endif %}
+                </td>
+                <td>{{ req.created_at|date:"M d, Y" }}</td>
+                <td>
+                    <span class="badge {% if req.status == 'Approved' %}badge-available{% elif req.status == 'Rejected' %}badge-rejected{% else %}badge-pending{% endif %}">
+                        {{ req.status }}
+                    </span>
+                </td>
+                <td>
+                    <div class="admin-actions">
+                        <a href="{% url 'custom_admin:adoption_detail' req.pk %}" class="btn-action-sm btn-action-view">Review & Process</a>
+                        <a href="{% url 'custom_admin:adoption_delete' req.pk %}" class="btn-action-sm btn-action-delete">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center text-muted" style="padding:3rem;">No adoption requests found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- PAGINATION -->
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&status={{ status }}">&larr; Previous</a>
+    {% endif %}
+    <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&status={{ status }}">Next &rarr;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

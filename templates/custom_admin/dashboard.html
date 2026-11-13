@@ -1,0 +1,262 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block page_title %}Overview Dashboard{% endblock %}
+
+{% block content %}
+<!-- QUICK ACTIONS BAR -->
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+    <div>
+        <h1 style="font-size:1.5rem; font-weight:800; margin:0;">Welcome, {{ user.first_name|default:user.username }}!</h1>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.25rem;">Here is what is happening across Ruffy World today.</p>
+    </div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <a href="{% url 'custom_admin:pet_add' %}" class="btn btn-primary btn-sm">+ Add Pet</a>
+        <a href="{% url 'custom_admin:product_add' %}" class="btn btn-primary btn-sm">+ Add Accessory</a>
+        <a href="{% url 'custom_admin:vet_add' %}" class="btn btn-outline btn-sm" style="color:var(--text); border-color:var(--border);">+ Add Vet</a>
+    </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="admin-stat-grid">
+    <div class="admin-stat-card">
+        <div class="admin-stat-header">
+            <span>Store Pets</span>
+            <span>🐶</span>
+        </div>
+        <div class="admin-stat-value">{{ total_pets }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+            <strong style="color:var(--primary);">{{ available_pets }}</strong> available for adoption
+        </div>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-header">
+            <span>Adoption Requests</span>
+            <span>📋</span>
+        </div>
+        <div class="admin-stat-value">{{ pending_adoptions }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+            Requests awaiting review
+        </div>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-header">
+            <span>Store Accessories</span>
+            <span>🛍️</span>
+        </div>
+        <div class="admin-stat-value">{{ total_products }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+            {% if out_of_stock_products > 0 %}
+                <span style="color:#dc2626; font-weight:600;">{{ out_of_stock_products }} out of stock</span>
+            {% else %}
+                <span style="color:#16a34a;">All items in stock</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-header">
+            <span>Total Orders</span>
+            <span>📦</span>
+        </div>
+        <div class="admin-stat-value">{{ total_orders }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+            {{ pending_orders }} orders pending
+        </div>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-header">
+            <span>Store Revenue</span>
+            <span>৳</span>
+        </div>
+        <div class="admin-stat-value">৳{{ total_revenue|floatformat:0 }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+            Completed paid transactions
+        </div>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-header">
+            <span>Veterinarians</span>
+            <span>🩺</span>
+        </div>
+        <div class="admin-stat-value">{{ total_vets }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+            Covering morning, mid & night
+        </div>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-header">
+            <span>Registered Users</span>
+            <span>👥</span>
+        </div>
+        <div class="admin-stat-value">{{ total_users }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+            Community members & staff
+        </div>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-header">
+            <span>Community Posts</span>
+            <span>💬</span>
+        </div>
+        <div class="admin-stat-value">{{ total_posts }}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">
+            Member pet adoption listings
+        </div>
+    </div>
+</div>
+
+<!-- RECENT ACTIVITY SECTION -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+    <!-- RECENT ORDERS -->
+    <div class="admin-table-container">
+        <div class="admin-table-header">
+            <h3>Recent Store Orders</h3>
+            <a href="{% url 'custom_admin:order_list' %}" class="btn-action-sm btn-action-view">View All Orders &rarr;</a>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                    <td><strong>#{{ order.pk }}</strong></td>
+                    <td>{{ order.user.username }}</td>
+                    <td>৳{{ order.total_amount }}</td>
+                    <td>
+                        <span class="badge {% if order.payment_status == 'paid' %}badge-available{% else %}badge-pending{% endif %}">
+                            {{ order.get_payment_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-available">{{ order.get_status_display }}</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'custom_admin:order_detail' order.pk %}" class="btn-action-sm btn-action-view">Manage</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted" style="padding:2rem;">No orders yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- RECENT ADOPTION REQUESTS -->
+    <div class="admin-table-container">
+        <div class="admin-table-header">
+            <h3>Recent Adoption Requests</h3>
+            <a href="{% url 'custom_admin:adoption_list' %}" class="btn-action-sm btn-action-view">View All Requests &rarr;</a>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Applicant</th>
+                    <th>Pet</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in recent_requests %}
+                <tr>
+                    <td>#{{ req.pk }}</td>
+                    <td>{{ req.user.username }}</td>
+                    <td><strong>{{ req.pet.name }}</strong></td>
+                    <td>
+                        <span class="badge {% if req.status == 'Approved' %}badge-available{% elif req.status == 'Rejected' %}badge-rejected{% else %}badge-pending{% endif %}">
+                            {{ req.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'custom_admin:adoption_detail' req.pk %}" class="btn-action-sm btn-action-view">Review</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted" style="padding:2rem;">No adoption requests yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- RECENT PETS TABLE -->
+<div class="admin-table-container">
+    <div class="admin-table-header">
+        <h3>Store Pet Listings</h3>
+        <a href="{% url 'custom_admin:pet_list' %}" class="btn-action-sm btn-action-view">View All Pets &rarr;</a>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Pet</th>
+                <th>Type</th>
+                <th>Age</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pet in recent_pets %}
+            <tr>
+                <td>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        {% if pet.image %}
+                            <img src="{{ pet.image.url }}" alt="{{ pet.name }}" style="width:38px; height:38px; border-radius:6px; object-fit:cover;">
+                        {% else %}
+                            <div style="width:38px; height:38px; border-radius:6px; background:var(--accent-light); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">🐾</div>
+                        {% endif %}
+                        <div>
+                            <strong>{{ pet.name }}</strong>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">{{ pet.location }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ pet.animal_type }}</td>
+                <td>{{ pet.age|default:'—' }}</td>
+                <td>
+                    {% if pet.price %}
+                        ৳{{ pet.price }} <span style="font-size:0.75rem; color:var(--text-muted);">({{ pet.get_price_type_display }})</span>
+                    {% else %}
+                        Free
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge {% if pet.status == 'Available' %}badge-available{% else %}badge-adopted{% endif %}">
+                        {{ pet.status }}
+                    </span>
+                </td>
+                <td>
+                    <div class="admin-actions">
+                        <a href="{% url 'custom_admin:pet_edit' pet.pk %}" class="btn-action-sm btn-action-edit">Edit</a>
+                        <a href="{% url 'custom_admin:pet_delete' pet.pk %}" class="btn-action-sm btn-action-delete">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted" style="padding:2rem;">No pets listed.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

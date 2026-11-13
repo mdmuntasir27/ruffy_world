@@ -1,0 +1,22 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block page_title %}Delete Product{% endblock %}
+
+{% block content %}
+<div style="max-width:550px; margin:2rem auto;">
+    <div class="card" style="border-color:#fca5a5;">
+        <div class="card-header" style="background:#fee2e2; color:#991b1b;">
+            ⚠️ Delete Accessory Product
+        </div>
+        <div class="card-body">
+            <p style="font-size:1.05rem; margin-bottom:1rem;">
+                Are you sure you want to permanently delete <strong>"{{ product.name }}"</strong> ({{ product.get_category_display }})?
+            </p>
+            <form method="post" style="display:flex; justify-content:flex-end; gap:0.75rem;">
+                {% csrf_token %}
+                <a href="{% url 'custom_admin:product_list' %}" class="btn btn-outline" style="color:var(--text); border-color:var(--border);">Cancel</a>
+                <button type="submit" class="btn btn-danger">Yes, Delete Product</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

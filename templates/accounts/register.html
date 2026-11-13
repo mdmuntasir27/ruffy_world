@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block title %}Register - Ruffy World{% endblock %}
+
+{% block content %}
+<style>
+.strength-bar { height:6px; flex:1; border-radius:3px; background:var(--border); transition:background 0.3s; }
+</style>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Create an Account</h2>
+        <p class="auth-subtitle">Join Ruffy World and find your perfect pet</p>
+
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                {{ form.phone }}
+                <small class="text-muted">Used so other users can contact you about adoptions.</small>
+                {% if form.phone.errors %}<ul class="errorlist">{% for e in form.phone.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}<ul class="errorlist">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <!-- PASSWORD STRENGTH METER -->
+            <div id="reg-strength-container" style="display:none; margin-top:-0.5rem; margin-bottom:0.75rem;">
+              <div style="display:flex; gap:4px; margin-bottom:4px;">
+                <div class="strength-bar" id="reg-bar1"></div>
+                <div class="strength-bar" id="reg-bar2"></div>
+                <div class="strength-bar" id="reg-bar3"></div>
+                <div class="strength-bar" id="reg-bar4"></div>
+              </div>
+              <div id="reg-strength-label" style="font-size:0.8rem; font-weight:600;"></div>
+              <ul style="margin-top:0.5rem; padding-left:1.2rem; font-size:0.8rem; color:var(--text-muted);">
+                <li id="reg-c-len">At least 8 characters</li>
+                <li id="reg-c-upper">At least one uppercase letter</li>
+                <li id="reg-c-lower">At least one lowercase letter</li>
+                <li id="reg-c-num">At least one number</li>
+                <li id="reg-c-special">At least one special character</li>
+              </ul>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                {{ form.password2 }}
+                <div id="reg-match-msg" style="font-size:0.8rem; margin-top:4px;"></div>
+                {% if form.password2.errors %}<ul class="errorlist">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+
+            <button type="submit" id="reg-submit-btn" class="btn btn-primary btn-block" disabled title="Password must be Strong or Very Strong to register">Create Account</button>
+        </form>
+
+        <hr class="divider">
+        <p class="text-center text-muted" style="font-size: 0.875rem;">
+            Already have an account? <a href="{% url 'login' %}" style="color: var(--primary-light);">Login here</a>
+        </p>
+    </div>
+</div>
+
+<script>
+(function(){
+  var p1 = document.querySelector('input[name="password1"]');
+  var p2 = document.querySelector('input[name="password2"]');
+  if(!p1 || !p2) return;
+  var sc = document.getElementById('reg-strength-container');
+  var bars = [document.getElementById('reg-bar1'),document.getElementById('reg-bar2'),document.getElementById('reg-bar3'),document.getElementById('reg-bar4')];
+  var label = document.getElementById('reg-strength-label');
+  var matchMsg = document.getElementById('reg-match-msg');
+  var submitBtn = document.getElementById('reg-submit-btn');
+  var criteria = {
+    len: document.getElementById('reg-c-len'),
+    upper: document.getElementById('reg-c-upper'),
+    lower: document.getElementById('reg-c-lower'),
+    num: document.getElementById('reg-c-num'),
+    special: document.getElementById('reg-c-special')
+  };
+  var currentScore = 0;
+
+  function checkStrength(pw){
+    var score = 0;
+    var checks = {len: pw.length>=8, upper: /[A-Z]/.test(pw), lower: /[a-z]/.test(pw), num: /[0-9]/.test(pw), special: /[^A-Za-z0-9]/.test(pw)};
+    for(var k in checks){
+      if(checks[k]) score++;
+      criteria[k].style.color = checks[k] ? 'var(--primary-light)' : 'var(--text-muted)';
+      criteria[k].style.textDecoration = checks[k] ? 'line-through' : 'none';
+    }
+    return score;
+  }
+
+  function updateBars(score){
+    currentScore = score;
+    var barCount = 0;
+    var color = '#ef4444';
+    var text = 'Weak';
+    if(score <= 2) {
+      barCount = 1;
+      color = '#ef4444';
+      text = 'Weak (Needs more criteria met)';
+    } else if(score === 3) {
+      barCount = 2;
+      color = '#f97316';
+      text = 'Medium (Not allowed - must be Strong or Very Strong)';
+    } else if(score === 4) {
+      barCount = 3;
+      color = '#22c55e';
+      text = 'Strong ✓';
+    } else if(score === 5) {
+      barCount = 4;
+      color = '#15803d';
+      text = 'Very Strong ✓';
+    }
+    bars.forEach(function(b, i){
+      b.style.background = i < barCount ? color : 'var(--border)';
+    });
+    label.textContent = score > 0 ? text : '';
+    label.style.color = score > 0 ? color : '';
+  }
+
+  p1.addEventListener('input', function(){
+    sc.style.display = p1.value.length > 0 ? 'block' : 'none';
+    updateBars(checkStrength(p1.value));
+    checkMatch();
+  });
+
+  p2.addEventListener('input', checkMatch);
+
+  function checkMatch(){
+    var isStrongOrVeryStrong = currentScore >= 4;
+    var passwordsMatch = p1.value.length > 0 && p1.value === p2.value;
+    if(p2.value.length > 0){
+      if(passwordsMatch){
+        matchMsg.textContent = '✓ Passwords match';
+        matchMsg.style.color = '#22c55e';
+      } else {
+        matchMsg.textContent = '✗ Passwords do not match';
+        matchMsg.style.color = '#ef4444';
+      }
+    } else {
+      matchMsg.textContent = '';
+    }
+    if(submitBtn) {
+      submitBtn.disabled = !(isStrongOrVeryStrong && passwordsMatch);
+      if(!isStrongOrVeryStrong && p1.value.length > 0) {
+        submitBtn.title = 'Password must be Strong or Very Strong to register.';
+      } else if(!passwordsMatch && p2.value.length > 0) {
+        submitBtn.title = 'Passwords must match.';
+      } else {
+        submitBtn.title = '';
+      }
+    }
+  }
+})();
+</script>
+{% endblock %}

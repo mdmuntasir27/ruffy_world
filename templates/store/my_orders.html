@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}My Orders - Ruffy World Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header mt-2" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <div>
+            <h1>📦 My Store Orders</h1>
+            <p>Track your pet accessory purchases and download digital receipts</p>
+        </div>
+        <a href="{% url 'store_home' %}" class="btn btn-primary">
+            🛍️ Browse Pet Store
+        </a>
+    </div>
+
+    {% if orders %}
+        <div class="card">
+            <div class="card-header">
+                Order History ({{ orders|length }} order{{ orders|length|pluralize }})
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date Placed</th>
+                            <th>Items</th>
+                            <th>Payment Method</th>
+                            <th>Payment Status</th>
+                            <th>Order Status</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td><strong>#{{ order.pk }}</strong></td>
+                            <td>{{ order.created_at|date:"d M Y" }}</td>
+                            <td>
+                                <div style="font-size:0.85rem;">
+                                    {% for item in order.items.all %}
+                                        <div>{{ item.quantity }}x {{ item.product_name }}</div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if order.payment_method == 'online' %}
+                                    <span>💳 Online</span>
+                                {% else %}
+                                    <span>💵 Cash on Delivery</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if order.payment_status == 'paid' %}
+                                    <span class="badge badge-available">Paid</span>
+                                {% else %}
+                                    <span class="badge badge-pending">Due</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge badge-available">{{ order.get_status_display }}</span>
+                            </td>
+                            <td style="font-weight: 800; color: var(--primary-light);">
+                                BDT {{ order.total_amount }}
+                            </td>
+                            <td>
+                                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                    <a href="{% url 'order_detail' order.pk %}" class="btn btn-sm btn-primary">
+                                        View
+                                    </a>
+                                    <a href="{% url 'download_receipt' order.pk %}" class="btn btn-sm btn-outline" target="_blank" style="color:var(--text); border-color:var(--border);" title="Download PDF Receipt">
+                                        📄 Receipt
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <h3>No orders placed yet</h3>
+            <p>You haven't purchased any items from the pet accessory store yet.</p>
+            <a href="{% url 'store_home' %}" class="btn btn-primary mt-2">Start Shopping</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

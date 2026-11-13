@@ -1,0 +1,133 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block page_title %}Manage Order #{{ order.pk }}{% endblock %}
+
+{% block content %}
+<div style="max-width:950px; margin:0 auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+            <h1 style="font-size:1.5rem; font-weight:800; margin:0;">Order #{{ order.pk }}</h1>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.25rem;">
+                Placed on {{ order.created_at|date:"F d, Y at H:i" }} by <strong>{{ order.user.username }}</strong>
+            </p>
+        </div>
+        <div style="display:flex; gap:0.5rem;">
+            <a href="{% url 'order_receipt' order.pk %}" target="_blank" class="btn btn-primary btn-sm">🧾 Digital Receipt</a>
+            <a href="{% url 'custom_admin:order_list' %}" class="btn btn-outline btn-sm" style="color:var(--text); border-color:var(--border);">&larr; Back to Orders</a>
+        </div>
+    </div>
+
+    <!-- ORDER SUMMARY & CUSTOMER INFO -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+        <div class="card">
+            <div class="card-header">👤 Customer Information</div>
+            <div class="card-body">
+                <table class="info-table">
+                    <tr><td>Account Username:</td><td><strong>{{ order.user.username }}</strong></td></tr>
+                    <tr><td>Recipient Full Name:</td><td>{{ order.full_name|default:order.user.username }}</td></tr>
+                    <tr><td>Account Email:</td><td>{{ order.user.email }}</td></tr>
+                    <tr><td>Contact Phone:</td><td><strong>{{ order.phone }}</strong></td></tr>
+                    <tr><td>Shipping Address:</td><td>{{ order.shipping_address }}</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">💳 Payment & Delivery Status</div>
+            <div class="card-body">
+                <table class="info-table">
+                    <tr><td>Order Total:</td><td><strong style="font-size:1.2rem; color:var(--primary);">৳{{ order.total_amount }}</strong></td></tr>
+                    <tr><td>Payment Method:</td><td>{{ order.get_payment_method_display }}</td></tr>
+                    <tr><td>Payment Status:</td><td><span class="badge {% if order.payment_status == 'paid' %}badge-available{% else %}badge-pending{% endif %}">{{ order.get_payment_status_display }}</span></td></tr>
+                    <tr><td>Order Progress:</td><td><span class="badge badge-available">{{ order.get_status_display }}</span></td></tr>
+                    <tr><td>Last Updated:</td><td>{{ order.updated_at|date:"M d, Y H:i" }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER ITEMS -->
+    <div class="admin-table-container">
+        <div class="admin-table-header">
+            <h3>Ordered Items</h3>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:0.75rem;">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" style="width:36px; height:36px; border-radius:6px; object-fit:cover;">
+                            {% else %}
+                                <div style="width:36px; height:36px; border-radius:6px; background:var(--accent-light); display:flex; align-items:center; justify-content:center;">🛍️</div>
+                            {% endif %}
+                            <strong>{{ item.product_name }}</strong>
+                        </div>
+                    </td>
+                    <td>৳{{ item.price_at_purchase }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td><strong>৳{{ item.subtotal }}</strong></td>
+                </tr>
+                {% endfor %}
+                <tr style="background:var(--bg); font-weight:800;">
+                    <td colspan="3" style="text-align:right;">Grand Total:</td>
+                    <td style="color:var(--primary); font-size:1.1rem;">৳{{ order.total_amount }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- UPDATE ORDER FORM -->
+    <div class="card">
+        <div class="card-header">⚙️ Update Order Processing & Shipping</div>
+        <div class="card-body">
+            <form method="post" class="form-stack">
+                {% csrf_token %}
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Order Fulfillment Status</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}<div class="form-error">{{ form.status.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Status</label>
+                        {{ form.payment_status }}
+                        {% if form.payment_status.errors %}<div class="form-error">{{ form.payment_status.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Recipient Name</label>
+                        {{ form.full_name }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Phone</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}<div class="form-error">{{ form.phone.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Delivery Address</label>
+                    {{ form.shipping_address }}
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+                    <a href="{% url 'custom_admin:order_delete' order.pk %}" class="btn btn-danger btn-sm">Delete Order</a>
+                    <button type="submit" class="btn btn-primary">Update Order Information</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

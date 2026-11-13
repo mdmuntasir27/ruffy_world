@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Order #{{ order.pk }} - Ruffy World{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header mt-2">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <h1>🎉 Order Confirmation #{{ order.pk }}</h1>
+                <p>Thank you for shopping at Ruffy World! Your order has been placed.</p>
+            </div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <a href="{% url 'download_receipt' order.pk %}" class="btn btn-primary" target="_blank">
+                    📄 Download Receipt (PDF)
+                </a>
+                <a href="{% url 'my_orders' %}" class="btn btn-outline" style="color:var(--text); border-color:var(--border);">
+                    My Orders
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 360px; gap: 2rem; align-items: start;">
+        <!-- Left: Items -->
+        <div class="card">
+            <div class="card-header">
+                Ordered Items
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Unit Price</th>
+                            <th>Qty</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                        <tr>
+                            <td>
+                                <strong>{{ item.product_name }}</strong>
+                            </td>
+                            <td>BDT {{ item.price_at_purchase }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td style="font-weight: 700; color: var(--primary-light);">BDT {{ item.subtotal }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" style="text-align: right; font-weight: 800; font-size: 1.1rem;">
+                                Total Amount Paid/Due:
+                            </td>
+                            <td style="font-weight: 800; font-size: 1.25rem; color: var(--primary-light);">
+                                BDT {{ order.total_amount }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right: Order Details -->
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    Order Information
+                </div>
+                <div class="card-body">
+                    <table class="info-table">
+                        <tr>
+                            <td>Order Number</td>
+                            <td><strong>#{{ order.pk }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Order Date</td>
+                            <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
+                        </tr>
+                        <tr>
+                            <td>Order Status</td>
+                            <td>
+                                <span class="badge badge-available">{{ order.get_status_display }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Payment Method</td>
+                            <td>
+                                {% if order.payment_method == 'online' %}
+                                    <span class="badge badge-available">💳 Online Payment</span>
+                                {% else %}
+                                    <span class="badge badge-pending">💵 Cash on Delivery</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Payment Status</td>
+                            <td>
+                                {% if order.payment_status == 'paid' %}
+                                    <span class="badge badge-available">✓ Paid</span>
+                                {% else %}
+                                    <span class="badge badge-pending">⏳ Due on Delivery</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Recipient</td>
+                            <td>{{ order.full_name|default:order.user.username }}</td>
+                        </tr>
+                        <tr>
+                            <td>Phone</td>
+                            <td>{{ order.phone }}</td>
+                        </tr>
+                        <tr>
+                            <td>Delivery Address</td>
+                            <td>📍 {{ order.shipping_address }}</td>
+                        </tr>
+                    </table>
+
+                    <div style="margin-top: 1.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                        <a href="{% url 'download_receipt' order.pk %}" class="btn btn-primary btn-block" target="_blank" style="justify-content:center;">
+                            🖨️ View & Print PDF Receipt
+                        </a>
+                        <a href="{% url 'store_home' %}" class="btn btn-outline btn-block" style="justify-content:center; color:var(--text); border-color:var(--border);">
+                            Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

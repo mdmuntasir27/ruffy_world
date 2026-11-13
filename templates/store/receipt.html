@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Receipt #{{ order.pk }} - Ruffy World</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .receipt-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 680px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2.5rem;
+            position: relative;
+        }
+
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #273e48;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-subtitle {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .receipt-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .receipt-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .meta-group h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            margin-bottom: 0.4rem;
+        }
+
+        .meta-group p {
+            line-height: 1.5;
+            color: #0f172a;
+        }
+
+        .payment-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .payment-status-tag {
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+        }
+
+        .paid-tag {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .cod-tag {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f8fafc;
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 2px solid #cbd5e1;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .total-row td {
+            font-size: 1.15rem;
+            font-weight: 800;
+            border-top: 2px solid #0f172a;
+            border-bottom: none;
+            padding-top: 1rem;
+            color: #273e48;
+        }
+
+        .receipt-footer {
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .actions-bar {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1.4rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-print {
+            background: #273e48;
+            color: #ffffff;
+        }
+
+        .btn-print:hover {
+            background: #395865;
+        }
+
+        .btn-back {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .btn-back:hover {
+            background: #cbd5e1;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .receipt-card {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            .actions-bar {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="receipt-card">
+    <div class="receipt-header">
+        <div>
+            <div class="brand-title">🐾 Ruffy World</div>
+            <div class="brand-subtitle">Pet Adoption & Accessories Store &middot; Dhaka, Bangladesh</div>
+            <div class="brand-subtitle">Email: support@ruffyworld.com</div>
+        </div>
+        <div style="text-align: right;">
+            <div class="receipt-badge">Official Digital Receipt</div>
+            <div style="font-weight: 800; font-size: 1.1rem; margin-top: 0.5rem; color: #1e293b;">
+                Invoice #{{ order.pk }}
+            </div>
+            <div style="font-size: 0.85rem; color: #64748b;">
+                {{ order.created_at|date:"d M Y, h:i A" }}
+            </div>
+        </div>
+    </div>
+
+    <div class="receipt-meta">
+        <div class="meta-group">
+            <h4>Billed & Shipped To</h4>
+            <p><strong>{{ order.full_name|default:order.user.username }}</strong></p>
+            <p>📞 {{ order.phone }}</p>
+            <p>📍 {{ order.shipping_address }}</p>
+        </div>
+        <div class="meta-group">
+            <h4>Order Summary</h4>
+            <p><strong>Status:</strong> {{ order.get_status_display }}</p>
+            <p><strong>Order ID:</strong> #{{ order.pk }}</p>
+            <p><strong>Currency:</strong> BDT (Bangladeshi Taka)</p>
+        </div>
+    </div>
+
+    <!-- Payment Information Block -->
+    <div class="payment-box">
+        <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700;">
+                Payment Method Selected
+            </div>
+            <div style="font-weight: 800; font-size: 1rem; color: #0f172a; margin-top: 0.2rem;">
+                {% if order.payment_method == 'online' %}
+                    💳 Online Payment (Electronic Transfer)
+                {% else %}
+                    💵 Cash on Delivery (COD)
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            {% if order.payment_status == 'paid' %}
+                <span class="payment-status-tag paid-tag">✓ PAID IN FULL</span>
+            {% else %}
+                <span class="payment-status-tag cod-tag">⏳ PAYABLE ON DELIVERY</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50%;">Item & Description</th>
+                <th style="text-align: center;">Qty</th>
+                <th style="text-align: right;">Unit Price</th>
+                <th style="text-align: right;">Total Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+            <tr>
+                <td>
+                    <div style="font-weight: 700; color: #0f172a;">{{ item.product_name }}</div>
+                </td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="text-align: right;">BDT {{ item.price_at_purchase }}</td>
+                <td style="text-align: right; font-weight: 700;">BDT {{ item.subtotal }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Total Paid / Payable:</td>
+                <td style="text-align: right;">BDT {{ order.total_amount }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="receipt-footer">
+        <p>🐾 <strong>Thank you for choosing Ruffy World!</strong></p>
+        <p>Every purchase helps support rescue pets across the country.</p>
+        <p style="font-size: 0.75rem; margin-top: 0.5rem; color: #94a3b8;">
+            This is a computer-generated digital invoice and receipt. No physical signature is required.
+        </p>
+    </div>
+</div>
+
+<div class="actions-bar">
+    <button onclick="window.print()" class="btn-action btn-print">
+        🖨️ Print / Save as PDF
+    </button>
+    <a href="{% url 'order_detail' order.pk %}" class="btn-action btn-back">
+        &larr; Back to Order Details
+    </a>
+    <a href="{% url 'store_home' %}" class="btn-action btn-back">
+        Go to Store
+    </a>
+</div>
+
+</body>
+</html>
+
