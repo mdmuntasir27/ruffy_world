@@ -74,23 +74,14 @@ class Command(BaseCommand):
             },
         ]
 
-        created_count = 0
-        updated_count = 0
-        for item in vets:
-            obj, created = Vet.objects.get_or_create(
-                name=item['name'],
-                shift=item['shift'],
-                defaults=item
-            )
-            if created:
-                created_count += 1
-            else:
-                for key, val in item.items():
-                    setattr(obj, key, val)
-                obj.save()
-                updated_count += 1
-
-        self.stdout.write(self.style.SUCCESS(
-            f'Successfully populated vets: {created_count} created, {updated_count} updated.'
-        ))
+        if Vet.objects.count() == 0:
+            for item in vets:
+                Vet.objects.create(**item)
+            self.stdout.write(self.style.SUCCESS(
+                f'Successfully populated vets: {len(vets)} veterinarians created.'
+            ))
+        else:
+            self.stdout.write(self.style.SUCCESS(
+                'Veterinarians directory already populated, skipping to preserve your changes.'
+            ))
 

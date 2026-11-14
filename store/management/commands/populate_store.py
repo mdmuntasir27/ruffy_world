@@ -159,22 +159,14 @@ class Command(BaseCommand):
             },
         ]
 
-        created_count = 0
-        updated_count = 0
-        for item in accessories:
-            obj, created = Product.objects.get_or_create(
-                name=item['name'],
-                defaults=item
-            )
-            if created:
-                created_count += 1
-            else:
-                for key, val in item.items():
-                    setattr(obj, key, val)
-                obj.save()
-                updated_count += 1
-
-        self.stdout.write(self.style.SUCCESS(
-            f'Successfully populated store: {created_count} created, {updated_count} updated.'
-        ))
+        if Product.objects.count() == 0:
+            for item in accessories:
+                Product.objects.create(**item)
+            self.stdout.write(self.style.SUCCESS(
+                f'Successfully populated store: {len(accessories)} products created.'
+            ))
+        else:
+            self.stdout.write(self.style.SUCCESS(
+                'Store already has products, skipping populate to preserve your changes.'
+            ))
 

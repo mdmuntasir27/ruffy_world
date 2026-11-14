@@ -65,7 +65,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'yeager_adoption.wsgi.application'
 
-if os.environ.get('VERCEL'):
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    try:
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=DATABASE_URL,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
+        }
+    except Exception:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': '/tmp/db.sqlite3' if os.environ.get('VERCEL') else BASE_DIR / 'db.sqlite3',
+            }
+        }
+elif os.environ.get('VERCEL'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
