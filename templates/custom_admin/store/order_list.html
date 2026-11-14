@@ -81,7 +81,7 @@
                 <td>
                     <div class="admin-actions">
                         <a href="{% url 'custom_admin:order_detail' order.pk %}" class="btn-action-sm btn-action-view">Manage</a>
-                        <a href="{% url 'order_receipt' order.pk %}" target="_blank" class="btn-action-sm btn-action-edit" title="Receipt">🧾</a>
+                        <a href="{% url 'download_receipt' order.pk %}" target="_blank" class="btn-action-sm btn-action-edit" title="Receipt">🧾</a>
                         <a href="{% url 'custom_admin:order_delete' order.pk %}" class="btn-action-sm btn-action-delete">Delete</a>
                     </div>
                 </td>

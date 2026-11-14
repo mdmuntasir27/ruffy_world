@@ -1,8 +1,9 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
+from django.views.static import serve
 from pets.views import pet_list
 
 
@@ -25,4 +26,7 @@ urlpatterns = [
 
     # Backwards compatibility redirect for password-reset
     path('accounts/password-reset/', RedirectView.as_view(pattern_name='forgot_password', permanent=False), name='password_reset'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    # Explicit media serving fallback (ensures uploaded media works even if DEBUG=False or in /tmp)
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]

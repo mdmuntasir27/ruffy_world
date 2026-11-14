@@ -105,3 +105,27 @@ class CustomAdminPanelTests(TestCase):
         self.assertContains(response, "Security Policy")
         # Verify password input field is NOT in form
         self.assertNotContains(response, 'type="password"')
+
+    def test_admin_order_list_and_detail(self):
+        self.client.login(username="admin", password="admin123")
+        order = Order.objects.create(
+            user=self.user,
+            full_name="Test Customer",
+            phone="01712345678",
+            shipping_address="Dhanmondi, Dhaka",
+            total_amount=3500.00,
+            payment_method="cod",
+            payment_status="pending",
+            status="pending"
+        )
+        # Test order list rendering with orders
+        response = self.client.get(reverse('custom_admin:order_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"#{order.pk}")
+        self.assertContains(response, "Test Customer")
+
+        # Test order detail rendering
+        detail_response = self.client.get(reverse('custom_admin:order_detail', args=[order.pk]))
+        self.assertEqual(detail_response.status_code, 200)
+        self.assertContains(detail_response, f"Order #{order.pk}")
+        self.assertContains(detail_response, "Digital Receipt")

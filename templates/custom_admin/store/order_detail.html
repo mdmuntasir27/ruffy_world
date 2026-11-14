@@ -11,7 +11,7 @@
             </p>
         </div>
         <div style="display:flex; gap:0.5rem;">
-            <a href="{% url 'order_receipt' order.pk %}" target="_blank" class="btn btn-primary btn-sm">🧾 Digital Receipt</a>
+            <a href="{% url 'download_receipt' order.pk %}" target="_blank" class="btn btn-primary btn-sm">🧾 Digital Receipt</a>
             <a href="{% url 'custom_admin:order_list' %}" class="btn btn-outline btn-sm" style="color:var(--text); border-color:var(--border);">&larr; Back to Orders</a>
         </div>
     </div>
