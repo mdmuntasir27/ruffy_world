@@ -29,6 +29,14 @@ INSTALLED_APPS = [
     'custom_admin',
 ]
 
+# Add cloudinary apps only if the package is installed
+try:
+    import cloudinary  # noqa: F401
+    import cloudinary_storage  # noqa: F401
+    INSTALLED_APPS += ['cloudinary', 'cloudinary_storage']
+except ImportError:
+    pass
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -98,6 +106,27 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# ── Cloudinary (used on Vercel and any environment with CLOUDINARY_CLOUD_NAME set) ──
+_CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+if _CLOUDINARY_CLOUD_NAME:
+    import cloudinary
+    cloudinary.config(
+        cloud_name=_CLOUDINARY_CLOUD_NAME,
+        api_key=os.environ.get('CLOUDINARY_API_KEY', ''),
+        api_secret=os.environ.get('CLOUDINARY_API_SECRET', ''),
+        secure=True,
+    )
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': _CLOUDINARY_CLOUD_NAME,
+        'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
+        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
+    }
+elif os.environ.get('VERCEL'):
+    # Fallback on Vercel without Cloudinary: write to /tmp
+    MEDIA_ROOT = '/tmp/media'
+    os.makedirs('/tmp/media', exist_ok=True)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
